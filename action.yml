@@ -12,7 +12,7 @@ inputs:
     required: false
   org:
     description: The org to get names from.
-    default: ${{ context.event.organization.login }}
+    default: ${{ github.event.organization.login }}
     required: false
 
 runs:
