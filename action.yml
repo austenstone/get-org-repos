@@ -1,6 +1,6 @@
-name: TypeScript Action
+name: Get Organization Repository Names
 author: Austen Stone
-description: A TypeScript Action
+description: Get all an organization's repository names to do matrix builds.
 branding:
   icon: "plus"
   color: "blue"
@@ -9,6 +9,10 @@ inputs:
   github-token:
     description: The GitHub token used to create an authenticated client
     default: ${{ github.token }}
+    required: false
+  org:
+    description: The org to get names from.
+    default: ${{ context.event.organization.login }}
     required: false
 
 runs:

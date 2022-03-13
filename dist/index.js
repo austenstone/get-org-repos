@@ -10210,27 +10210,13 @@ function getInputs() {
     return result;
 }
 exports.getInputs = getInputs;
-const getRepoNames = () => __awaiter(void 0, void 0, void 0, function* () {
+const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, function* () {
     let repoNames = [];
-    const input = getInputs();
-    const octokit = new (utils_1.GitHub.plugin(plugin_throttling_1.throttling))(Object.assign(Object.assign({}, (0, utils_1.getOctokitOptions)(input.token)), { throttle: {
-            onRateLimit: (retryAfter, options, octokit) => {
-                octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-                if (options.request.retryCount === 0) {
-                    octokit.log.info(`Retrying after ${retryAfter} seconds!`);
-                    return true;
-                }
-                return false;
-            },
-            onSecondaryRateLimit: (_, options, octokit) => {
-                octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
-            },
-        } }));
     let _hasNextPage = true;
     let _endCursor = null;
     while (_hasNextPage) {
         const { organization: { repositories: { nodes: repositories, pageInfo: { hasNextPage, endCursor } } } } = yield octokit.graphql(`{ 
-      organization(login:"${input.orgLogin}") {
+      organization(login:"${orgLogin}") {
         repositories(first:100, after:${JSON.stringify(_endCursor)}) {
           nodes {
             name
@@ -10246,19 +10232,38 @@ const getRepoNames = () => __awaiter(void 0, void 0, void 0, function* () {
         _endCursor = endCursor;
         const names = repositories
             .map(repo => repo.name)
-            .filter(name => name !== input.orgLogin);
+            .filter(name => name !== orgLogin);
         core.info(names.join('\n'));
         repoNames = repoNames.concat(names);
     }
     return repoNames;
 });
+const createOctokit = (token) => {
+    return new (utils_1.GitHub.plugin(plugin_throttling_1.throttling))(Object.assign(Object.assign({}, (0, utils_1.getOctokitOptions)(token)), { throttle: {
+            onRateLimit: (retryAfter, options, octokit) => {
+                octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+                if (options.request.retryCount === 0) {
+                    octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+                    return true;
+                }
+                return false;
+            },
+            onSecondaryRateLimit: (_, options, octokit) => {
+                octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+            },
+        } }));
+};
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        return core.group('Get Repo Names', () => getRepoNames().then((repoNames) => {
-            core.info(`${repoNames.length} repositories found`);
+        const input = getInputs();
+        const octokit = createOctokit(input.token);
+        const repoNames = yield core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin)
+            .then((repoNames) => {
             core.setOutput('repos', JSON.stringify(repoNames));
-            console.log(`Ouput 'repos' set\nAccess with $\{{ fromJson(needs.${github_1.context.job ? github_1.context.job : '<job_id>'}.outputs.repos) }}`);
+            return repoNames;
         }));
+        core.info(`${repoNames.length} repositories found`);
+        core.info(`Ouput 'repos' set\nAccess with $\{{ fromJson(needs.${github_1.context.job ? github_1.context.job : '<job_id>'}.outputs.repos) }}`);
     }
     catch (error) {
         core.setFailed(error instanceof Error ? error.message : JSON.stringify(error));
