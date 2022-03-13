@@ -1,5 +1,7 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
+import { context } from '@actions/github';
+import { Octokit } from '@octokit/core';
+import { throttling } from '@octokit/plugin-throttling';
 
 interface Input {
   token: string;
@@ -9,7 +11,7 @@ interface Input {
 export function getInputs(): Input {
   const result = {} as Input;
   result.token = core.getInput('github-token');
-  result.orgLogin = github.context.payload.organization?.login || core.getInput('org');
+  result.orgLogin = context.payload.organization?.login || core.getInput('org');
   if (!result.orgLogin) throw Error(`No organization in event context.`)
   return result;
 }
@@ -18,7 +20,20 @@ const run = async (): Promise<string[]> => {
   let repoNames: string[] = [];
   try {
     const input = getInputs();
-    const octokit: ReturnType<typeof github.getOctokit> = github.getOctokit(input.token);
+    const octokit = new (Octokit.plugin(throttling))({
+      auth: input.token,
+      onRateLimit: (retryAfter, options, octokit) => {
+        octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+        if (options.request.retryCount === 0) {
+          octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+          return true;
+        }
+        return false;
+      },
+      onSecondaryRateLimit: (_, options, octokit) => {
+        octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+      },
+    });
 
     let hasNextPage = true;
     while (hasNextPage) {
