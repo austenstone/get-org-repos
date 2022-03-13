@@ -25,7 +25,7 @@ const run = async (): Promise<string[]> => {
       const {
         organization: { repositories }
       } = await octokit.graphql(`{ 
-        organization(login:"${input.orgLogin}") {
+        organization(login:"123${input.orgLogin}") {
           repositories(first:1) {
             nodes {
               name
