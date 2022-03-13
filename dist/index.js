@@ -10198,8 +10198,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getInputs = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
-const core_1 = __nccwpck_require__(6762);
 const plugin_throttling_1 = __nccwpck_require__(9968);
+const utils_1 = __nccwpck_require__(3030);
 function getInputs() {
     var _a;
     const result = {};
@@ -10214,9 +10214,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     let repoNames = [];
     try {
         const input = getInputs();
-        const octokit = new (core_1.Octokit.plugin(plugin_throttling_1.throttling))({
-            auth: input.token,
-            throttle: {
+        const octokit = new (utils_1.GitHub.plugin(plugin_throttling_1.throttling))(Object.assign(Object.assign({}, (0, utils_1.getOctokitOptions)(input.token)), { throttle: {
                 onRateLimit: (retryAfter, options, octokit) => {
                     octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
                     if (options.request.retryCount === 0) {
@@ -10228,25 +10226,27 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
                 onSecondaryRateLimit: (_, options, octokit) => {
                     octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
                 },
-            }
-        });
-        let hasNextPage = true;
-        while (hasNextPage) {
-            const { organization: { repositories } } = yield octokit.graphql(`{ 
+            } }));
+        let _hasNextPage = true;
+        let _endCursor = null;
+        while (_hasNextPage) {
+            const { organization: { repositories: { nodes: repositories, pageInfo: { hasNextPage, endCursor } } } } = yield octokit.graphql(`{ 
         organization(login:"${input.orgLogin}") {
-          repositories(first:100) {
+          repositories(first:100, after:${_endCursor ? `"${_endCursor}"` : _endCursor}) {
             nodes {
               name
             }
             pageInfo {
               hasNextPage
+              endCursor
             }
           }
         }
       }`);
+            _hasNextPage = hasNextPage;
+            _endCursor = endCursor;
             console.log(repositories);
-            hasNextPage = repositories.pageInfo.hasNextPage;
-            repoNames = repoNames.concat(repositories.nodes
+            repoNames = repoNames.concat(repositories
                 .map(repo => repo.name)
                 .filter(name => name !== input.orgLogin));
         }
