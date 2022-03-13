@@ -8384,6 +8384,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
           }
         }
       }`);
+            console.log(repoResponse);
             hasNextPage = repoResponse.pageInfo.hasNextPage;
             repoNames = repoNames.concat(repoResponse.nodes
                 .map(repo => repo.name)
