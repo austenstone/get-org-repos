@@ -52,7 +52,7 @@ const run = async (): Promise<string[]> => {
         }
       } = await octokit.graphql(`{ 
         organization(login:"${input.orgLogin}") {
-          repositories(first:100, after:${_endCursor}) {
+          repositories(first:100, after:${_endCursor ? `"${_endCursor}"` : _endCursor}) {
             nodes {
               name
             }
