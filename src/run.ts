@@ -23,7 +23,7 @@ const run = async (): Promise<string[]> => {
     let hasNextPage = true;
     while (hasNextPage) {
       const {
-        organization: { repoResponse }
+        organization: { repositories }
       } = await octokit.graphql(`{ 
         organization(login:"${input.orgLogin}") {
           repositories(first:100) {
@@ -36,9 +36,9 @@ const run = async (): Promise<string[]> => {
           }
         }
       }`);
-      console.log(repoResponse)
-      hasNextPage = repoResponse.pageInfo.hasNextPage;
-      repoNames = repoNames.concat(repoResponse.nodes
+      console.log(repositories)
+      hasNextPage = repositories.pageInfo.hasNextPage;
+      repoNames = repoNames.concat(repositories.nodes
         .map(repo => repo.name)
         .filter(name => name !== input.orgLogin))
     }
