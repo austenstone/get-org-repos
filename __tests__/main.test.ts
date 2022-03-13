@@ -4,6 +4,7 @@ import * as path from 'path';
 import { test } from '@jest/globals';
 
 test('test run', () => {
+  process.env['INPUT_ORG'] = 'astoneorg1';
   process.env['INPUT_GITHUB-TOKEN'] = process.env.GITHUB_TOKEN;
   const np = process.execPath;
   const ip = path.join(__dirname, '..', 'dist', 'index.js');

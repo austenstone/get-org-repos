@@ -8356,27 +8356,45 @@ exports.getInputs = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getInputs() {
+    var _a;
     const result = {};
     result.token = core.getInput('github-token');
-    if (!result.token)
-        throw Error('No input \'github-token\'');
+    result.orgLogin = ((_a = github.context.payload.organization) === null || _a === void 0 ? void 0 : _a.login) || core.getInput('org');
+    if (!result.orgLogin)
+        throw Error(`No organization login in event context.`);
     return result;
 }
 exports.getInputs = getInputs;
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
+    let repos = [];
     try {
-        const inputs = getInputs();
-        const octokit = github.getOctokit(inputs.token);
-        const { viewer: { login }, } = yield octokit.graphql(`{ 
-      viewer { 
-        login
-      }
-    }`);
-        core.info(`Hello, ${login}!`);
+        const input = getInputs();
+        const octokit = github.getOctokit(input.token);
+        let hasNextPage = false;
+        while (hasNextPage) {
+            const { organization: { repoResponse } } = yield octokit.graphql(`{ 
+        organization(login:"${input.orgLogin}") {
+          repositories(first:100) {
+            nodes {
+              name
+            }
+            pageInfo {
+              hasNextPage
+            }
+          }
+        }
+      }`);
+            hasNextPage = repoResponse.pageInfo.hasNextPage;
+            console.log(JSON.stringify(repoResponse, null, 2));
+            repos = [...repoResponse.nodes
+                    .map(repo => repo.name)
+                    .filter(name => name !== input.orgLogin)];
+        }
     }
     catch (error) {
         core.setFailed(error instanceof Error ? error.message : JSON.stringify(error));
     }
+    return repos;
 });
 exports["default"] = run;
 
