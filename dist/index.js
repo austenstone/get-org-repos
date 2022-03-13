@@ -8361,12 +8361,12 @@ function getInputs() {
     result.token = core.getInput('github-token');
     result.orgLogin = ((_a = github.context.payload.organization) === null || _a === void 0 ? void 0 : _a.login) || core.getInput('org');
     if (!result.orgLogin)
-        throw Error(`No organization login in event context.`);
+        throw Error(`No organization in event context.`);
     return result;
 }
 exports.getInputs = getInputs;
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
-    let repos = [];
+    let repoNames = [];
     try {
         const input = getInputs();
         const octokit = github.getOctokit(input.token);
@@ -8385,8 +8385,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         }
       }`);
             hasNextPage = repoResponse.pageInfo.hasNextPage;
-            console.log(JSON.stringify(repoResponse, null, 2));
-            repos = [...repoResponse.nodes
+            repoNames = [...repoResponse.nodes
                     .map(repo => repo.name)
                     .filter(name => name !== input.orgLogin)];
         }
@@ -8394,7 +8393,10 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         core.setFailed(error instanceof Error ? error.message : JSON.stringify(error));
     }
-    return repos;
+    const repoNamesString = JSON.stringify(repoNames);
+    core.info(repoNamesString);
+    core.setOutput('repos', repoNamesString);
+    return repoNames;
 });
 exports["default"] = run;
 
