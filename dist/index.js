@@ -10201,15 +10201,29 @@ const github_1 = __nccwpck_require__(5438);
 const plugin_throttling_1 = __nccwpck_require__(9968);
 const utils_1 = __nccwpck_require__(3030);
 function getInputs() {
-    var _a;
     const result = {};
     result.token = core.getInput('github-token');
-    result.orgLogin = ((_a = github_1.context.payload.organization) === null || _a === void 0 ? void 0 : _a.login) || core.getInput('org');
+    result.orgLogin = core.getInput('org');
     if (!result.orgLogin)
         throw Error(`No organization in event context.`);
     return result;
 }
 exports.getInputs = getInputs;
+const createOctokit = (token) => {
+    return new (utils_1.GitHub.plugin(plugin_throttling_1.throttling))(Object.assign(Object.assign({}, (0, utils_1.getOctokitOptions)(token)), { throttle: {
+            onRateLimit: (retryAfter, options, octokit) => {
+                octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+                if (options.request.retryCount === 0) {
+                    octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+                    return true;
+                }
+                return false;
+            },
+            onSecondaryRateLimit: (_, options, octokit) => {
+                octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+            },
+        } }));
+};
 const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, function* () {
     let repoNames = [];
     let _hasNextPage = true;
@@ -10238,21 +10252,6 @@ const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, fu
     }
     return repoNames;
 });
-const createOctokit = (token) => {
-    return new (utils_1.GitHub.plugin(plugin_throttling_1.throttling))(Object.assign(Object.assign({}, (0, utils_1.getOctokitOptions)(token)), { throttle: {
-            onRateLimit: (retryAfter, options, octokit) => {
-                octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-                if (options.request.retryCount === 0) {
-                    octokit.log.info(`Retrying after ${retryAfter} seconds!`);
-                    return true;
-                }
-                return false;
-            },
-            onSecondaryRateLimit: (_, options, octokit) => {
-                octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
-            },
-        } }));
-};
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const input = getInputs();
