@@ -10210,54 +10210,57 @@ function getInputs() {
     return result;
 }
 exports.getInputs = getInputs;
-const run = () => __awaiter(void 0, void 0, void 0, function* () {
+const getRepoNames = () => __awaiter(void 0, void 0, void 0, function* () {
     let repoNames = [];
-    try {
-        const input = getInputs();
-        const octokit = new (utils_1.GitHub.plugin(plugin_throttling_1.throttling))(Object.assign(Object.assign({}, (0, utils_1.getOctokitOptions)(input.token)), { throttle: {
-                onRateLimit: (retryAfter, options, octokit) => {
-                    octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-                    if (options.request.retryCount === 0) {
-                        octokit.log.info(`Retrying after ${retryAfter} seconds!`);
-                        return true;
-                    }
-                    return false;
-                },
-                onSecondaryRateLimit: (_, options, octokit) => {
-                    octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
-                },
-            } }));
-        let _hasNextPage = true;
-        let _endCursor = null;
-        while (_hasNextPage) {
-            const { organization: { repositories: { nodes: repositories, pageInfo: { hasNextPage, endCursor } } } } = yield octokit.graphql(`{ 
-        organization(login:"${input.orgLogin}") {
-          repositories(first:100, after:${JSON.stringify(_endCursor)}) {
-            nodes {
-              name
-            }
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
+    const input = getInputs();
+    const octokit = new (utils_1.GitHub.plugin(plugin_throttling_1.throttling))(Object.assign(Object.assign({}, (0, utils_1.getOctokitOptions)(input.token)), { throttle: {
+            onRateLimit: (retryAfter, options, octokit) => {
+                octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+                if (options.request.retryCount === 0) {
+                    octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+                    return true;
+                }
+                return false;
+            },
+            onSecondaryRateLimit: (_, options, octokit) => {
+                octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+            },
+        } }));
+    let _hasNextPage = true;
+    let _endCursor = null;
+    while (_hasNextPage) {
+        const { organization: { repositories: { nodes: repositories, pageInfo: { hasNextPage, endCursor } } } } = yield octokit.graphql(`{ 
+      organization(login:"${input.orgLogin}") {
+        repositories(first:100, after:${JSON.stringify(_endCursor)}) {
+          nodes {
+            name
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
           }
         }
-      }`);
-            _hasNextPage = hasNextPage;
-            _endCursor = endCursor;
-            console.log(repositories);
-            repoNames = repoNames.concat(repositories
-                .map(repo => repo.name)
-                .filter(name => name !== input.orgLogin));
-        }
+      }
+    }`);
+        _hasNextPage = hasNextPage;
+        _endCursor = endCursor;
+        const names = repositories
+            .map(repo => repo.name)
+            .filter(name => name !== input.orgLogin);
+        core.info(JSON.stringify(names, null, 2));
+        repoNames = repoNames.concat(names);
+    }
+    return repoNames;
+});
+const run = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        return core.group('Get Repo Names', () => getRepoNames()).then((repoNames) => {
+            core.setOutput('repos', JSON.stringify(repoNames));
+        });
     }
     catch (error) {
         core.setFailed(error instanceof Error ? error.message : JSON.stringify(error));
     }
-    const repoNamesString = JSON.stringify(repoNames);
-    core.info(repoNamesString);
-    core.setOutput('repos', repoNamesString);
-    return repoNames;
 });
 exports["default"] = run;
 
