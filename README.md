@@ -1,46 +1,100 @@
 # TypeScript Action Template
 
-This repository serves as a [template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template) for TypeScript [Actions](https://docs.github.com/en/actions).
-<br>For JavaScript see [austenstone/action-javascript](https://github.com/austenstone/action-javascript).
+This is an [Action](https://docs.github.com/en/actions) to list all an orgnization's repositories.
 
-## 🧑‍💻 Development
-Use [ts-node-dev](https://github.com/wclr/ts-node-dev) for a hot-reload dev environment.
-```
-npm run dev
-```
-
-## 🔨 Build
-Build the project with [ncc](https://github.com/vercel/ncc).<br>The build artifacts will be stored in a single file `dist/index.js`.
-```
-npm run build
-```
-
-## 🧪 Test
-Test the project with [jest](https://github.com/facebook/jest).
-```
-npm test
-```
-
-## 🧹 Lint
-Linting is done with [eslint](https://github.com/eslint/eslint).
-```
-npm run lint
-```
-
-## 🏃 Usage
-[Create a workflow](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file) (eg: [`.github/workflows/run.yml`](.github/workflows/usage.yaml))
+There are multiple use cases for repeating a task for all the repositories in an organization.
 
 ### Default Workflow
 ```yml
-name: "Add to Project"
+name: Hello World
+
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  run:
+  get-repos:
+    name: Get Repos
     runs-on: ubuntu-latest
     steps:
-      - uses: austenstone/action-typescript@main
+      - uses: austenstone/get-org-repos@main
+        id: get-repos
+    outputs:
+      repos: ${{ steps.get-repos.outputs.repos }}
+
+  print:
+    name: Print
+    needs: [get-repos]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
+    steps:
+      - name: Print
+        run: echo "Hello ${{ matrix.repo }}!"
+```
+
+### Git Workflow
+```yml
+name: Usage
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  get-repos:
+    name: Run Action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: austenstone/get-org-repos@main
+        id: get-repos
+    outputs:
+      repos: ${{ steps.get-repos.outputs.repos }}
+
+  print:
+    name: Print
+    needs: [get-repos]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
+    steps:
+      - name: Print
+        run: echo "Hello ${{ matrix.repo }}"
+
+  sync:
+    name: Sync Repository
+    needs:
+      - repo-arr
+    strategy:
+      matrix:
+        repo: ${{ fromJson(needs.repo-arr.outputs.repos) }}
+      fail-fast: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository ${{ matrix.repo }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.organization.login }}/${{ matrix.repo }}
+          token: ${{ secrets.GH_TOKEN }}
+      - run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+      - run: git remote add source https://github.com/${{ github.event.organization.login }}/${{ github.event.repository.name }}
+      - run: git fetch source
+      - run: git merge --allow-unrelated-histories --squash -X ours source/main
+      - run: git remote remove source
+      - run: |
+          for fileName in .github/workflows/sync.yml README.md; do
+            git reset HEAD -- $fileName
+            git clean -f -q -- $fileName
+          done 
+      - run: git diff-index --quiet HEAD || git commit -am "Organization sync"
+      - run: git push
 ```
 
 ## ➡️ Input Settings
@@ -49,6 +103,7 @@ Various inputs are defined in [`action.yml`](action.yml):
 | Name | Description | Default |
 | --- | - | - |
 | github&#x2011;token | Token to use to authorize. | ${{&nbsp;github.token&nbsp;}} |
+| org | The organization name. | ${{&nbsp;github.event.organization.login&nbsp;}} |
 
 ## Further help
 To get more help on the Actions see [documentation](https://docs.github.com/en/actions).
