@@ -86,7 +86,7 @@ const run = async (): Promise<void> => {
       })
     );
     core.info(`${repoNames.length} repositories found`);
-    core.info(`Ouput 'repos' set\nAccess with $\{{ fromJson(needs.${context.job ? context.job : '<job_id>'}.outputs.repos) }}`);
+    core.info(`Access output 'repos' with $\{{ fromJson(needs.${context.job ? context.job : '<job_id>'}.outputs.repos) }}`);
   } catch (error) {
     core.setFailed(error instanceof Error ? error.message : JSON.stringify(error));
   }
