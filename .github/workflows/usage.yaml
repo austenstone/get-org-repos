@@ -5,11 +5,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  run:
+  get-repos:
     name: Run Action
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./
         id: get-repos
-      - run: echo "${{steps.get-repos.outputs.repos}}"
+    outputs:
+      repos: ${{ steps.get-repos.outputs.repos }}
+
+  print:
+    name: Print
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
+    steps:
+      - name: Print
+        run: echo "Hello ${{ repo }}"
