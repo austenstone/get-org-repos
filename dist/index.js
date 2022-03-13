@@ -8372,7 +8372,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         const octokit = github.getOctokit(input.token);
         let hasNextPage = true;
         while (hasNextPage) {
-            const { organization: { repoResponse } } = yield octokit.graphql(`{ 
+            const { organization: { repositories } } = yield octokit.graphql(`{ 
         organization(login:"${input.orgLogin}") {
           repositories(first:100) {
             nodes {
@@ -8384,9 +8384,9 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
           }
         }
       }`);
-            console.log(repoResponse);
-            hasNextPage = repoResponse.pageInfo.hasNextPage;
-            repoNames = repoNames.concat(repoResponse.nodes
+            console.log(repositories);
+            hasNextPage = repositories.pageInfo.hasNextPage;
+            repoNames = repoNames.concat(repositories.nodes
                 .map(repo => repo.name)
                 .filter(name => name !== input.orgLogin));
         }
