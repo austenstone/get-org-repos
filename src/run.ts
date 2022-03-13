@@ -15,7 +15,7 @@ export function getInputs(): Input {
 }
 
 const run = async (): Promise<string[]> => {
-  let repos: string[] = [];
+  let repoNames: string[] = [];
   try {
     const input = getInputs();
     const octokit: ReturnType<typeof github.getOctokit> = github.getOctokit(input.token);
@@ -38,15 +38,17 @@ const run = async (): Promise<string[]> => {
         }
       }`);
       hasNextPage = repoResponse.pageInfo.hasNextPage;
-      repos = [...repoResponse.nodes
+      repoNames = [...repoResponse.nodes
         .map(repo => repo.name)
         .filter(name => name !== input.orgLogin)]
     }
   } catch (error) {
     core.setFailed(error instanceof Error ? error.message : JSON.stringify(error))
   }
-  core.setOutput('repos', JSON.stringify(repos));
-  return repos;
+  const repoNamesString = JSON.stringify(repoNames);
+  core.info(repoNamesString);
+  core.setOutput('repos', repoNamesString);
+  return repoNames;
 };
 
 export default run;
