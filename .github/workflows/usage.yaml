@@ -1,4 +1,4 @@
-name: TypeScript Action Workflow
+name: Usage
 on:
   push:
   pull_request:
@@ -9,5 +9,6 @@ jobs:
     name: Run Action
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: ./
       - run: echo "${{steps.set-result.outputs.repos}}"
