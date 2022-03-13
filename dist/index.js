@@ -10232,7 +10232,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         while (_hasNextPage) {
             const { organization: { repositories: { nodes: repositories, pageInfo: { hasNextPage, endCursor } } } } = yield octokit.graphql(`{ 
         organization(login:"${input.orgLogin}") {
-          repositories(first:100, after:${_endCursor ? `"${_endCursor}"` : _endCursor}) {
+          repositories(first:100, after:${JSON.stringify(_endCursor)}) {
             nodes {
               name
             }

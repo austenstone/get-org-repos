@@ -16,67 +16,71 @@ export function getInputs(): Input {
   return result;
 }
 
-const run = async (): Promise<string[]> => {
+const getRepoNames = async (): Promise<string[]> => {
   let repoNames: string[] = [];
-  try {
-    const input = getInputs();
-    const octokit = new (GitHub.plugin(throttling))({
-      ...getOctokitOptions(input.token),
-      throttle: {
-        onRateLimit: (retryAfter, options, octokit) => {
-          octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-          if (options.request.retryCount === 0) {
-            octokit.log.info(`Retrying after ${retryAfter} seconds!`);
-            return true;
-          }
-          return false;
-        },
-        onSecondaryRateLimit: (_, options, octokit) => {
-          octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
-        },
-      }
-    });
-
-    let _hasNextPage = true;
-    let _endCursor = null;
-    while (_hasNextPage) {
-      const {
-        organization: { 
-          repositories: {
-            nodes: repositories,
-            pageInfo: {
-              hasNextPage,
-              endCursor
-            }
-          }
+  const input = getInputs();
+  const octokit = new (GitHub.plugin(throttling))({
+    ...getOctokitOptions(input.token),
+    throttle: {
+      onRateLimit: (retryAfter, options, octokit) => {
+        octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+        if (options.request.retryCount === 0) {
+          octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+          return true;
         }
-      } = await octokit.graphql(`{ 
-        organization(login:"${input.orgLogin}") {
-          repositories(first:100, after:${_endCursor ? `"${_endCursor}"` : _endCursor}) {
-            nodes {
-              name
-            }
-            pageInfo {
-              hasNextPage
-              endCursor
-            }
-          }
-        }
-      }`);
-      _hasNextPage = hasNextPage;
-      _endCursor = endCursor;
-      console.log(repositories)
-      repoNames = repoNames.concat(repositories
-        .map(repo => repo.name)
-        .filter(name => name !== input.orgLogin))
+        return false;
+      },
+      onSecondaryRateLimit: (_, options, octokit) => {
+        octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+      },
     }
+  });
+
+  let _hasNextPage = true;
+  let _endCursor = null;
+  while (_hasNextPage) {
+    const {
+      organization: { 
+        repositories: {
+          nodes: repositories,
+          pageInfo: {
+            hasNextPage,
+            endCursor
+          }
+        }
+      }
+    } = await octokit.graphql(`{ 
+      organization(login:"${input.orgLogin}") {
+        repositories(first:100, after:${JSON.stringify(_endCursor)}) {
+          nodes {
+            name
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
+      }
+    }`);
+    _hasNextPage = hasNextPage;
+    _endCursor = endCursor;
+    const names = repositories
+      .map(repo => repo.name)
+      .filter(name => name !== input.orgLogin);
+    core.info(JSON.stringify(names, null, 2));
+    repoNames = repoNames.concat(names);
+  }
+  return repoNames;
+}
+
+const run = async (): Promise<void> => {
+  try {
+    return core.group('Get Repo Names', () => getRepoNames()).then((repoNames) => {
+      core.setOutput('repos', JSON.stringify(repoNames));
+    });
   } catch (error) {
     core.setFailed(error instanceof Error ? error.message : JSON.stringify(error))
   }
-  const repoNamesString = JSON.stringify(repoNames);
-  core.info(repoNamesString);
-  core.setOutput('repos', repoNamesString);
-  return repoNames;
 };
 
 export default run;
