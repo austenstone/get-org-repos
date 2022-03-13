@@ -9,5 +9,5 @@ jobs:
     name: Run Action
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - uses: ./
+        run: echo "${{steps.set-result.outputs.repos}}"
