@@ -22,17 +22,19 @@ const run = async (): Promise<string[]> => {
     const input = getInputs();
     const octokit = new (Octokit.plugin(throttling))({
       auth: input.token,
-      onRateLimit: (retryAfter, options, octokit) => {
-        octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-        if (options.request.retryCount === 0) {
-          octokit.log.info(`Retrying after ${retryAfter} seconds!`);
-          return true;
-        }
-        return false;
-      },
-      onSecondaryRateLimit: (_, options, octokit) => {
-        octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
-      },
+      throttle: {
+        onRateLimit: (retryAfter, options, octokit) => {
+          octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+          if (options.request.retryCount === 0) {
+            octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+            return true;
+          }
+          return false;
+        },
+        onSecondaryRateLimit: (_, options, octokit) => {
+          octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+        },
+      }
     });
 
     let hasNextPage = true;

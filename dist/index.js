@@ -10216,17 +10216,19 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         const input = getInputs();
         const octokit = new (core_1.Octokit.plugin(plugin_throttling_1.throttling))({
             auth: input.token,
-            onRateLimit: (retryAfter, options, octokit) => {
-                octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-                if (options.request.retryCount === 0) {
-                    octokit.log.info(`Retrying after ${retryAfter} seconds!`);
-                    return true;
-                }
-                return false;
-            },
-            onSecondaryRateLimit: (_, options, octokit) => {
-                octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
-            },
+            throttle: {
+                onRateLimit: (retryAfter, options, octokit) => {
+                    octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+                    if (options.request.retryCount === 0) {
+                        octokit.log.info(`Retrying after ${retryAfter} seconds!`);
+                        return true;
+                    }
+                    return false;
+                },
+                onSecondaryRateLimit: (_, options, octokit) => {
+                    octokit.log.warn(`SecondaryRateLimit detected for request ${options.method} ${options.url}`);
+                },
+            }
         });
         let hasNextPage = true;
         while (hasNextPage) {
