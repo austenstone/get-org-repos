@@ -10,7 +10,7 @@ export function getInputs(): Input {
   const result = {} as Input;
   result.token = core.getInput('github-token');
   result.orgLogin = github.context.payload.organization?.login || core.getInput('org');
-  if (!result.orgLogin) throw Error(`No organization login in event context.`)
+  if (!result.orgLogin) throw Error(`No organization in event context.`)
   return result;
 }
 
