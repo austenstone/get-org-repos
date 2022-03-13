@@ -8370,7 +8370,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const input = getInputs();
         const octokit = github.getOctokit(input.token);
-        let hasNextPage = false;
+        let hasNextPage = true;
         while (hasNextPage) {
             const { organization: { repoResponse } } = yield octokit.graphql(`{ 
         organization(login:"${input.orgLogin}") {
