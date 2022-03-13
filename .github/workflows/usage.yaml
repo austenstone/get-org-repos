@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: ./
-        run: echo "${{steps.set-result.outputs.repos}}"
+      - run: echo "${{steps.set-result.outputs.repos}}"
