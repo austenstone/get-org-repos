@@ -23,4 +23,4 @@ jobs:
         repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
     steps:
       - name: Print
-        run: echo "Hello ${{ repo }}"
+        run: echo "Hello ${{ matrix.repo }}"
