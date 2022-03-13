@@ -64,10 +64,10 @@ const getRepoNames = async (): Promise<string[]> => {
     }`);
     _hasNextPage = hasNextPage;
     _endCursor = endCursor;
-    const names = repositories
+    const names: string[] = repositories
       .map(repo => repo.name)
       .filter(name => name !== input.orgLogin);
-    core.info(JSON.stringify(names, null, 2));
+    core.info(names.join('\n'));
     repoNames = repoNames.concat(names);
   }
   return repoNames;

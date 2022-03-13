@@ -10247,7 +10247,7 @@ const getRepoNames = () => __awaiter(void 0, void 0, void 0, function* () {
         const names = repositories
             .map(repo => repo.name)
             .filter(name => name !== input.orgLogin);
-        core.info(JSON.stringify(names, null, 2));
+        core.info(names.join('\n'));
         repoNames = repoNames.concat(names);
     }
     return repoNames;
