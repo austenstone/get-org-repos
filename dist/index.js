@@ -8385,9 +8385,9 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         }
       }`);
             hasNextPage = repoResponse.pageInfo.hasNextPage;
-            repoNames = [...repoResponse.nodes
-                    .map(repo => repo.name)
-                    .filter(name => name !== input.orgLogin)];
+            repoNames = repoNames.concat(repoResponse.nodes
+                .map(repo => repo.name)
+                .filter(name => name !== input.orgLogin));
         }
     }
     catch (error) {
