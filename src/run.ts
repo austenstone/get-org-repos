@@ -75,9 +75,11 @@ const getRepoNames = async (): Promise<string[]> => {
 
 const run = async (): Promise<void> => {
   try {
-    return core.group('Get Repo Names', () => getRepoNames()).then((repoNames) => {
+    return core.group('Get Repo Names', () => getRepoNames().then((repoNames) => {
+      core.info(`${repoNames.length} repositories found`)
       core.setOutput('repos', JSON.stringify(repoNames));
-    });
+      console.log(`Ouput 'repos' set\nAccess with $\{{ fromJson(needs.${context.job ? context.job : '<job_id>'}.outputs.repos) }}`)
+    }));
   } catch (error) {
     core.setFailed(error instanceof Error ? error.message : JSON.stringify(error))
   }
