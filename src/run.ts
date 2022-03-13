@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import { context } from '@actions/github';
-import { Octokit } from '@octokit/core';
 import { throttling } from '@octokit/plugin-throttling';
+import { GitHub, getOctokitOptions } from '@actions/github/lib/utils'
 
 interface Input {
   token: string;
@@ -20,8 +20,8 @@ const run = async (): Promise<string[]> => {
   let repoNames: string[] = [];
   try {
     const input = getInputs();
-    const octokit = new (Octokit.plugin(throttling))({
-      auth: input.token,
+    const octokit = new (GitHub.plugin(throttling))({
+      ...getOctokitOptions(input.token),
       throttle: {
         onRateLimit: (retryAfter, options, octokit) => {
           octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
@@ -37,25 +37,36 @@ const run = async (): Promise<string[]> => {
       }
     });
 
-    let hasNextPage = true;
-    while (hasNextPage) {
+    let _hasNextPage = true;
+    let _endCursor = null;
+    while (_hasNextPage) {
       const {
-        organization: { repositories }
+        organization: { 
+          repositories: {
+            nodes: repositories,
+            pageInfo: {
+              hasNextPage,
+              endCursor
+            }
+          }
+        }
       } = await octokit.graphql(`{ 
         organization(login:"${input.orgLogin}") {
-          repositories(first:100) {
+          repositories(first:100, after:${_endCursor}) {
             nodes {
               name
             }
             pageInfo {
               hasNextPage
+              endCursor
             }
           }
         }
       }`);
+      _hasNextPage = hasNextPage;
+      _endCursor = endCursor;
       console.log(repositories)
-      hasNextPage = repositories.pageInfo.hasNextPage;
-      repoNames = repoNames.concat(repositories.nodes
+      repoNames = repoNames.concat(repositories
         .map(repo => repo.name)
         .filter(name => name !== input.orgLogin))
     }
