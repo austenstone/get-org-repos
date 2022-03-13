@@ -20,7 +20,7 @@ const run = async (): Promise<string[]> => {
     const input = getInputs();
     const octokit: ReturnType<typeof github.getOctokit> = github.getOctokit(input.token);
 
-    let hasNextPage = false;
+    let hasNextPage = true;
     while (hasNextPage) {
       const { organization: {
         repoResponse
@@ -37,6 +37,7 @@ const run = async (): Promise<string[]> => {
           }
         }
       }`);
+      
       hasNextPage = repoResponse.pageInfo.hasNextPage;
       repoNames = repoNames.concat(repoResponse.nodes
         .map(repo => repo.name)
