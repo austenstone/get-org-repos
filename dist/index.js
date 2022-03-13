@@ -8373,8 +8373,8 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
         let hasNextPage = true;
         while (hasNextPage) {
             const { organization: { repositories } } = yield octokit.graphql(`{ 
-        organization(login:"${input.orgLogin}") {
-          repositories(first:100) {
+        organization(login:"123${input.orgLogin}") {
+          repositories(first:1) {
             nodes {
               name
             }
