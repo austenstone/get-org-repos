@@ -2,8 +2,8 @@ name: Get Organization Repository Names
 author: Austen Stone
 description: Get all an organization's repository names to do matrix builds.
 branding:
-  icon: "plus"
-  color: "blue"
+  icon: "list"
+  color: "green"
 
 inputs:
   github-token:
