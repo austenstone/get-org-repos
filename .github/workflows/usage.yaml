@@ -8,6 +8,7 @@ on:
 jobs:
   get-repos:
     name: Get Repos
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./
@@ -18,6 +19,7 @@ jobs:
   print:
     name: Print
     needs: [get-repos]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
