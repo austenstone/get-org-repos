@@ -4,7 +4,7 @@ This is an [Action](https://docs.github.com/en/actions) to get all an orgnizatio
 
 The primary use case is for repeating a task for all the repositories in an organization.
 
-:warning: A job matrix can generate a maximum of [256](https://docs.github.com/en/actions/using-jobs/using-a-build-matrix-for-your-jobs#:~:text=A%20job%20matrix%20can%20generate%20a%20maximum%20of%20256%20jobs%20per%20workflow%20run.%20This%20limit%20also%20applies%20to%20self%2Dhosted%20runners.) jobs per workflow run. This limit also applies to self-hosted runners. :warning:
+:warning: A job matrix can generate a maximum of [256](https://docs.github.com/en/actions/using-jobs/using-a-build-matrix-for-your-jobs#:~:text=A%20job%20matrix%20can%20generate%20a%20maximum%20of%20256%20jobs%20per%20workflow%20run.%20This%20limit%20also%20applies%20to%20self%2Dhosted%20runners.) jobs per workflow run :warning:
 
 ### Default Workflow
 ```yml
