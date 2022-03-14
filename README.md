@@ -15,7 +15,6 @@ on:
 
 jobs:
   get-org-repos:
-    name: Get Repos
     runs-on: ubuntu-latest
     steps:
       - uses: austenstone/get-org-repos@main
@@ -26,16 +25,14 @@ jobs:
       repos: ${{ steps.get-org-repos.outputs.repos }}
 
   print:
-    name: Print Repo
-    needs: [get-org-repos]
     runs-on: ubuntu-latest
+    needs: [get-org-repos]
     strategy:
       matrix:
         repo: ${{ fromJson(needs.get-org-repos.outputs.repos) }}
       fail-fast: false
     steps:
-      - name: Print
-        run: echo "Hello ${{ matrix.repo }}!"
+      - run: echo "Hello ${{ matrix.repo }}!"
 ```
 
 ### Git Workflow
