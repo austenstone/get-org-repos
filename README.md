@@ -1,8 +1,8 @@
-# TypeScript Action Template
+# Get Organization's Repositories
 
 This is an [Action](https://docs.github.com/en/actions) to list all an orgnization's repositories.
 
-There are multiple use cases for repeating a task for all the repositories in an organization.
+There primary use case is for repeating a task for all the repositories in an organization.
 
 ### Default Workflow
 ```yml
@@ -37,7 +37,7 @@ jobs:
 
 ### Git Workflow
 ```yml
-name: Usage
+name: Sync Repositories
 
 on:
   push:
@@ -45,39 +45,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  get-repos:
-    name: Run Action
+  get-org-repos:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: austenstone/get-org-repos@main
-        id: get-repos
+        id: get-org-repos
     outputs:
-      repos: ${{ steps.get-repos.outputs.repos }}
-
-  print:
-    name: Print
-    needs: [get-repos]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
-    steps:
-      - name: Print
-        run: echo "Hello ${{ matrix.repo }}"
+      repos: ${{ steps.get-org-repos.outputs.repos }}
 
   sync:
-    name: Sync Repository
     needs:
-      - repo-arr
+      - get-org-repos
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: ${{ fromJson(needs.repo-arr.outputs.repos) }}
+        repo: ${{ fromJson(needs.get-org-repos.outputs.repos) }}
       fail-fast: false
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository ${{ matrix.repo }}
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           repository: ${{ github.event.organization.login }}/${{ matrix.repo }}
           token: ${{ secrets.GH_TOKEN }}
