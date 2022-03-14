@@ -68,20 +68,7 @@ jobs:
         with:
           repository: ${{ github.event.organization.login }}/${{ matrix.repo }}
           token: ${{ secrets.GH_TOKEN }}
-      - run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@users.noreply.github.com'
-      - run: git remote add source https://github.com/${{ github.event.organization.login }}/${{ github.event.repository.name }}
-      - run: git fetch source
-      - run: git merge --allow-unrelated-histories --squash -X ours source/main
-      - run: git remote remove source
-      - run: |
-          for fileName in .github/workflows/sync.yml README.md; do
-            git reset HEAD -- $fileName
-            git clean -f -q -- $fileName
-          done 
-      - run: git diff-index --quiet HEAD || git commit -am "Organization sync"
-      - run: git push
+      - run: ls -al
 ```
 
 ## ➡️ Input Settings
