@@ -2,7 +2,7 @@
 
 This is an [Action](https://docs.github.com/en/actions) to list all an orgnization's repositories.
 
-There primary use case is for repeating a task for all the repositories in an organization.
+The primary use case is for repeating a task for all the repositories in an organization.
 
 ### Default Workflow
 ```yml
