@@ -14,22 +14,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  get-repos:
+  get-org-repos:
     name: Get Repos
     runs-on: ubuntu-latest
     steps:
       - uses: austenstone/get-org-repos@main
-        id: get-repos
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+        id: get-org-repos
     outputs:
-      repos: ${{ steps.get-repos.outputs.repos }}
+      repos: ${{ steps.get-org-repos.outputs.repos }}
 
   print:
-    name: Print
-    needs: [get-repos]
+    name: Print Repo
+    needs: [get-org-repos]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: ${{ fromJson(needs.get-repos.outputs.repos) }}
+        repo: ${{ fromJson(needs.get-org-repos.outputs.repos) }}
+      fail-fast: false
     steps:
       - name: Print
         run: echo "Hello ${{ matrix.repo }}!"
@@ -48,8 +51,9 @@ jobs:
   get-org-repos:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - uses: austenstone/get-org-repos@main
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
         id: get-org-repos
     outputs:
       repos: ${{ steps.get-org-repos.outputs.repos }}
