@@ -10262,7 +10262,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
             return repoNames;
         }));
         core.info(`${repoNames.length} repositories found`);
-        core.info(`Ouput 'repos' set\nAccess with $\{{ fromJson(needs.${github_1.context.job ? github_1.context.job : '<job_id>'}.outputs.repos) }}`);
+        core.info(`Access output 'repos' with $\{{ fromJson(needs.${github_1.context.job ? github_1.context.job : '<job_id>'}.outputs.repos) }}`);
     }
     catch (error) {
         core.setFailed(error instanceof Error ? error.message : JSON.stringify(error));
