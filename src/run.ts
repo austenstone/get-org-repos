@@ -68,7 +68,7 @@ const getRepoNames = async (octokit: Octokit, orgLogin: string): Promise<string[
     _endCursor = endCursor;
     const names: string[] = repositories
       .map(repo => repo.name)
-      .filter(name => name !== orgLogin);
+      .filter(name => name !== context.payload.repository?.name);
     core.info(names.join('\n'));
     repoNames = repoNames.concat(names);
   }
