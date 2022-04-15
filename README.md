@@ -1,6 +1,6 @@
 # Get Organization's Repositories
 
-This is an [Action](https://docs.github.com/en/actions) to get all an orgnization's repositories by name.
+This is an [Action](https://docs.github.com/en/actions) to get all an organization's repositories by name.
 
 The primary use case is for repeating a task for all the repositories in an organization.
 
