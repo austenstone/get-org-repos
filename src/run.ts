@@ -7,12 +7,14 @@ type Octokit = InstanceType<typeof GitHub>;
 interface Input {
   token: string;
   orgLogin: string;
+  topicFilter: string;
 }
 
 export function getInputs(): Input {
   const result = {} as Input;
   result.token = core.getInput('github-token');
   result.orgLogin = core.getInput('org');
+  result.topicFilter = core.getInput('topic-filter');
   if (!result.orgLogin) throw Error(`No organization in event context.`)
   return result;
 }
@@ -97,13 +99,20 @@ const run = async (): Promise<void> => {
   try {
     const input = getInputs();
     const octokit = createOctokit(input.token);
-    const repoNames = await core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin, "github-actions")
+    const repoNames = await core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin, input.topicFilter)
       .then((repoNames) => {
         core.setOutput('repos', JSON.stringify(repoNames));
         return repoNames;
       })
     );
-    core.info(`${repoNames.length} repositories found`);
+    
+    if (input.topicFilter) {
+      core.info(`${repoNames.length} repositories found with topic filter ${input.topicFilter}`);
+    }
+    else {
+      core.info(`${repoNames.length} repositories found`);
+    }
+
     core.info(`Access output 'repos' with $\{{ fromJson(needs.${context.job ? context.job : '<job_id>'}.outputs.repos) }}`);
   } catch (error) {
     core.setFailed(error instanceof Error ? error.message : JSON.stringify(error));

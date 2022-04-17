@@ -10204,6 +10204,7 @@ function getInputs() {
     const result = {};
     result.token = core.getInput('github-token');
     result.orgLogin = core.getInput('org');
+    result.topicFilter = core.getInput('topic-filter');
     if (!result.orgLogin)
         throw Error(`No organization in event context.`);
     return result;
@@ -10272,12 +10273,17 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const input = getInputs();
         const octokit = createOctokit(input.token);
-        const repoNames = yield core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin, "github-actions")
+        const repoNames = yield core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin, input.topicFilter)
             .then((repoNames) => {
             core.setOutput('repos', JSON.stringify(repoNames));
             return repoNames;
         }));
-        core.info(`${repoNames.length} repositories found`);
+        if (input.topicFilter) {
+            core.info(`${repoNames.length} repositories found with topic filter ${input.topicFilter}`);
+        }
+        else {
+            core.info(`${repoNames.length} repositories found`);
+        }
         core.info(`Access output 'repos' with $\{{ fromJson(needs.${github_1.context.job ? github_1.context.job : '<job_id>'}.outputs.repos) }}`);
     }
     catch (error) {

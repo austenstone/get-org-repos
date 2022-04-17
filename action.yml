@@ -7,14 +7,16 @@ branding:
 
 inputs:
   github-token:
-    description: The GitHub token used to create an authenticated client
+    description: The GitHub token used to create an authenticated client.
     default: ${{ github.token }}
     required: false
   org:
     description: The org to get names from.
     default: ${{ github.event.organization.login }}
     required: false
-
+  topic-filter:
+    description: The name of the topic to filter on.
+    required: false
 runs:
   using: "node16"
   main: "dist/index.js"
