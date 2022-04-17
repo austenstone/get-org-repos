@@ -10224,7 +10224,7 @@ const createOctokit = (token) => {
             },
         } }));
 };
-const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, function* () {
+const getRepoNames = (octokit, orgLogin, topicFilter) => __awaiter(void 0, void 0, void 0, function* () {
     let repoNames = [];
     let _hasNextPage = true;
     let _endCursor = null;
@@ -10233,7 +10233,16 @@ const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, fu
       organization(login:"${orgLogin}") {
         repositories(first:100, after:${JSON.stringify(_endCursor)}) {
           nodes {
-            name
+            name,
+            repositoryTopics(first: 100) {
+              edges {
+                node {
+                  topic {
+                    name
+                  }
+                }
+              }
+            }
           }
           pageInfo {
             hasNextPage
@@ -10244,9 +10253,16 @@ const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, fu
     }`);
         _hasNextPage = hasNextPage;
         _endCursor = endCursor;
-        const names = repositories
+        let names = repositories
             .map(repo => repo.name)
             .filter(name => { var _a; return name !== ((_a = github_1.context.payload.repository) === null || _a === void 0 ? void 0 : _a.name); });
+        if (topicFilter) {
+            names = names.filter(name => {
+                var _a;
+                const topics = (_a = repositories.find(repo => repo.name === name)) === null || _a === void 0 ? void 0 : _a.repositoryTopics.edges.map(edge => edge.node.topic.name);
+                return topics === null || topics === void 0 ? void 0 : topics.includes(topicFilter);
+            });
+        }
         core.info(names.join('\n'));
         repoNames = repoNames.concat(names);
     }
@@ -10256,7 +10272,7 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const input = getInputs();
         const octokit = createOctokit(input.token);
-        const repoNames = yield core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin)
+        const repoNames = yield core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin, "github-actions")
             .then((repoNames) => {
             core.setOutput('repos', JSON.stringify(repoNames));
             return repoNames;

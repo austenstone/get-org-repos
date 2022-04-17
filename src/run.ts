@@ -36,7 +36,7 @@ const createOctokit = (token: string): Octokit => {
   });
 }
 
-const getRepoNames = async (octokit: Octokit, orgLogin: string): Promise<string[]> => {
+const getRepoNames = async (octokit: Octokit, orgLogin, topicFilter: string): Promise<string[]> => {
   let repoNames: string[] = [];
   let _hasNextPage = true;
   let _endCursor = null;
@@ -55,7 +55,16 @@ const getRepoNames = async (octokit: Octokit, orgLogin: string): Promise<string[
       organization(login:"${orgLogin}") {
         repositories(first:100, after:${JSON.stringify(_endCursor)}) {
           nodes {
-            name
+            name,
+            repositoryTopics(first: 100) {
+              edges {
+                node {
+                  topic {
+                    name
+                  }
+                }
+              }
+            }
           }
           pageInfo {
             hasNextPage
@@ -66,9 +75,18 @@ const getRepoNames = async (octokit: Octokit, orgLogin: string): Promise<string[
     }`);
     _hasNextPage = hasNextPage;
     _endCursor = endCursor;
-    const names: string[] = repositories
+    let names: string[] = repositories
       .map(repo => repo.name)
       .filter(name => name !== context.payload.repository?.name);
+
+    if (topicFilter) {
+      // filter the repo that have the given topic
+      names = names.filter(name => {
+        const topics = repositories.find(repo => repo.name === name)?.repositoryTopics.edges.map(edge => edge.node.topic.name);
+        return topics?.includes(topicFilter);
+      });
+    }
+
     core.info(names.join('\n'));
     repoNames = repoNames.concat(names);
   }
@@ -79,7 +97,7 @@ const run = async (): Promise<void> => {
   try {
     const input = getInputs();
     const octokit = createOctokit(input.token);
-    const repoNames = await core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin)
+    const repoNames = await core.group('Get Repo Names', () => getRepoNames(octokit, input.orgLogin, "github-actions")
       .then((repoNames) => {
         core.setOutput('repos', JSON.stringify(repoNames));
         return repoNames;
