@@ -13,6 +13,5 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN }}
           org: austenstone-ghec
-          delimiter: "\n"
         id: get-org-repos
       - run: echo "${{ steps.get-org-repos.outputs.repos }}" > repos.txt
