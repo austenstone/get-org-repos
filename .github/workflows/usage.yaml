@@ -13,7 +13,7 @@ jobs:
       - uses: ./
         id: get-repos
         with:
-          org: astoneorg1
+          org: austenstone-ghec
     outputs:
       repos: ${{ steps.get-repos.outputs.repos }}
 
