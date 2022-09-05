@@ -55,7 +55,7 @@ jobs:
           github-token: ${{ secrets.TOKEN }}
           delimiter: "\\n"
         id: get-org-repos
-      - run: echo "${{ steps.get-org-repos.outputs.repos }}" > repos.txt
+      - run: echo -e "${{ steps.get-org-repos.outputs.repos }}" > repos.txt
 ```
 
 ### Git Workflow
