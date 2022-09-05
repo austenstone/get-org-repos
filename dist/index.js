@@ -13225,7 +13225,7 @@ const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, fu
         const names = repositories
             .map(repo => repo.name)
             .filter(name => { var _a; return name !== ((_a = github_1.context.payload.repository) === null || _a === void 0 ? void 0 : _a.name); });
-        core.info(names.join('\n'));
+        core.info(names.join('\\n'));
         repoNames = repoNames.concat(names);
     }
     return repoNames;
