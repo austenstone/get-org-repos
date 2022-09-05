@@ -53,7 +53,7 @@ jobs:
       - uses: austenstone/get-org-repos@main
         with:
           github-token: ${{ secrets.TOKEN }}
-          delimiter: "\\n"
+          delimiter: '\n'
         id: get-org-repos
       - run: echo -e "${{ steps.get-org-repos.outputs.repos }}" > repos.txt
 ```
