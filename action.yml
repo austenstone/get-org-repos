@@ -17,6 +17,9 @@ inputs:
   topic-filter:
     description: The name of the topic to filter on.
     required: false
+  delimiter:
+    description: The delimiter to use when returning a string.
+    required: false
 runs:
   using: "node16"
   main: "dist/index.js"
