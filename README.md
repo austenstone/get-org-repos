@@ -56,6 +56,7 @@ jobs:
           delimiter: '\n'
         id: get-org-repos
       - run: echo -e "${{ steps.get-org-repos.outputs.repos }}" > repos.txt
+      - run: cat repos.txt
 ```
 
 ### Git Workflow
