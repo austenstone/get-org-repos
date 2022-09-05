@@ -13234,7 +13234,6 @@ const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const input = getInputs();
         const octokit = createOctokit(input.token);
-        console.log('delim', input.delim, input.delim !== undefined, input.delim ? true : false);
         const repoNames = yield core.group('Get Repo Names', () => getRepoNames(octokit, input.org)
             .then((repoNames) => {
             core.setOutput('repos', input.delim ? repoNames.join(input.delim) : JSON.stringify(repoNames));

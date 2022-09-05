@@ -81,7 +81,6 @@ const run = async (): Promise<void> => {
   try {
     const input = getInputs();
     const octokit = createOctokit(input.token);
-    console.log('delim', input.delim, input.delim !== undefined, input.delim ? true : false);
     const repoNames = await core.group('Get Repo Names', () => getRepoNames(octokit, input.org)
       .then((repoNames) => {
         core.setOutput(
