@@ -13172,7 +13172,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInputs = void 0;
+exports.getRepoNames = exports.getInputs = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
 const plugin_throttling_1 = __nccwpck_require__(9968);
@@ -13230,11 +13230,12 @@ const getRepoNames = (octokit, orgLogin) => __awaiter(void 0, void 0, void 0, fu
     }
     return repoNames;
 });
+exports.getRepoNames = getRepoNames;
 const run = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const input = getInputs();
         const octokit = createOctokit(input.token);
-        const repoNames = yield core.group('Get Repo Names', () => getRepoNames(octokit, input.org)
+        const repoNames = yield core.group('Get Repo Names', () => (0, exports.getRepoNames)(octokit, input.org)
             .then((repoNames) => {
             core.setOutput('repos', input.delim ? repoNames.join(input.delim) : JSON.stringify(repoNames));
             return repoNames;

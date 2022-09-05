@@ -38,7 +38,7 @@ const createOctokit = (token: string): Octokit => {
   });
 }
 
-const getRepoNames = async (octokit: Octokit, orgLogin: string): Promise<string[]> => {
+export const getRepoNames = async (octokit: Octokit, orgLogin: string): Promise<string[]> => {
   let repoNames: string[] = [];
   let _hasNextPage = true;
   let _endCursor = null;
