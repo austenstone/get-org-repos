@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: austenstone/get-org-repos@main
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.TOKEN }}
         id: get-org-repos
     outputs:
       repos: ${{ steps.get-org-repos.outputs.repos }}
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: austenstone/get-org-repos@main
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.TOKEN }}
           delimiter: ","
         id: get-org-repos
       - run: echo "${{ steps.get-org-repos.outputs.repos }}" > repos.txt
@@ -73,7 +73,7 @@ jobs:
     steps:
       - uses: austenstone/get-org-repos@main
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.TOKEN }}
         id: get-org-repos
     outputs:
       repos: ${{ steps.get-org-repos.outputs.repos }}
@@ -90,7 +90,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           repository: ${{ github.event.organization.login }}/${{ matrix.repo }}
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.TOKEN }}
       - run: ls -al
 ```
 

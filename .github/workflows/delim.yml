@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: austenstone/get-org-repos@main
         with:
-          github-token: ${{ secrets.GH_TOKEN }}
+          github-token: ${{ secrets.TOKEN }}
           org: austenstone-ghec
           delimiter: ","
         id: get-org-repos

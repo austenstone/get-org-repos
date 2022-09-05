@@ -13,6 +13,7 @@ jobs:
       - uses: ./
         id: get-repos
         with:
+          github-token: ${{ secrets.TOKEN }}
           org: austenstone-ghec
     outputs:
       repos: ${{ steps.get-repos.outputs.repos }}
