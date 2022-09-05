@@ -37,6 +37,27 @@ jobs:
       - run: echo "Hello ${{ matrix.repo }}!"
 ```
 
+### Deliminate String Workflow
+```yml
+name: Hello World
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  get-org-repos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: austenstone/get-org-repos@main
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          delimiter: ","
+        id: get-org-repos
+      - run: echo "${{ steps.get-org-repos.outputs.repos }}" > repos.txt
+```
+
 ### Git Workflow
 ```yml
 name: Sync Repositories
@@ -80,6 +101,7 @@ Various inputs are defined in [`action.yml`](action.yml):
 | --- | - | - |
 | github&#x2011;token | Token to use to authorize. | ${{&nbsp;github.token&nbsp;}} |
 | org | The organization name. | ${{&nbsp;github.event.organization.login&nbsp;}} |
+| delimiter | The delimiter to use when joining the names. | N/A |
 
 ## Further help
 To get more help on the Actions see [documentation](https://docs.github.com/en/actions).
